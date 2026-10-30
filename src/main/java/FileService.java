@@ -3,13 +3,12 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+
 
 public class FileService {
 
-    public List<Player> loadPlayers(String fileName) {
-        List<Player> players = new ArrayList<>();
+    public MyArrayList loadPlayers(String fileName) {
+        MyArrayList players = new MyArrayList();
 
         try (BufferedReader reader =
                      Files.newBufferedReader(Path.of(fileName))) {
@@ -94,12 +93,13 @@ public class FileService {
     }
 
     public boolean savePlayers(
-            List<Player> players, String fileName) {
+            MyArrayList players, String fileName) {
 
         try (BufferedWriter writer =
                      Files.newBufferedWriter(Path.of(fileName))) {
 
-            for (Player player : players) {
+            for (int i = 0; i < players.size(); i++) {
+                Player player = players.get(i);
                 writer.write(
                         player.getName() + ","
                                 + player.getAge() + ","

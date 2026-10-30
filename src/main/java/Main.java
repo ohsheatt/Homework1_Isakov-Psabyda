@@ -5,7 +5,7 @@ public class Main {
 
     public static void main(String[] args) {
         FileService fileService = new FileService();
-        List<Player> players =
+        MyArrayList players =
                 fileService.loadPlayers("data/players.csv");
 
         Scanner scanner = new Scanner(System.in);
@@ -19,6 +19,8 @@ public class Main {
             System.out.println("4. Футболисты дороже заданной суммы");
             System.out.println("5. Сортировать по рыночной стоимости");
             System.out.println("6. Показать имена футболистов по клубу");
+            System.out.println("7. Получить футболиста по индексу");
+            System.out.println("8. Удалить футболиста по индексу");
             System.out.println("0. Выход");
             System.out.print("Выберите действие: ");
 
@@ -26,28 +28,25 @@ public class Main {
 
             switch (choice) {
                 case "1":
-                    if (players.isEmpty()) {
+                    if (players.size() == 0) {
                         System.out.println("Список футболистов пуст.");
                     } else {
-                        players.forEach(System.out::println);
+                        players.stream().forEach(System.out::println);
                     }
                     break;
 
                 case "2":
                     Player newPlayer = createPlayer(scanner);
-
                     players.add(newPlayer);
 
                     boolean saved = fileService.savePlayers(
                             players, "data/players.csv");
 
                     if (saved) {
-                        System.out.println(
-                                "Футболист добавлен и сохранён!");
+                        System.out.println("Футболист добавлен и сохранён!");
                     } else {
-                        players.remove(newPlayer);
-                        System.out.println(
-                                "Не удалось сохранить футболиста.");
+                        players.remove(players.size() - 1);
+                        System.out.println("Не удалось сохранить футболиста.");
                     }
                     break;
 
@@ -74,7 +73,7 @@ public class Main {
 
                     players.stream()
                             .filter(player ->
-                                    player.getMarketValue() > minValue)
+                                    player.getMarketValue() >= minValue)
                             .forEach(System.out::println);
                     break;
 
@@ -104,14 +103,46 @@ public class Main {
                     }
                     break;
 
+                case "7":
+                    if (players.size() == 0) {
+                        System.out.println("Список футболистов пуст.");
+                    } else {
+                        System.out.println("Количество футболистов: " + players.size());
+                        int index = readIndex(scanner, players.size());
+
+                        Player selectedPlayer = players.get(index);
+                        System.out.println("Найденный футболист:");
+                        System.out.println(selectedPlayer);
+                    }
+                    break;
+
+                case "8":
+                    if (players.size() == 0) {
+                        System.out.println("Список футболистов пуст.");
+                    } else {
+                        System.out.println("Количество футболистов: " + players.size());
+                        int index = readIndex(scanner, players.size());
+
+                        Player removedPlayer = players.remove(index);
+
+                        boolean savedAfterRemoval = fileService.savePlayers(
+                                players, "data/players.csv");
+
+                        if (savedAfterRemoval) {
+                            System.out.println("Удалён футболист: " + removedPlayer);
+                        } else {
+                            System.out.println("Не удалось сохранить изменения в файл.");
+                        }
+                    }
+                    break;
+
                 case "0":
                     running = false;
                     System.out.println("Программа завершена.");
                     break;
 
                 default:
-                    System.out.println(
-                            "Неизвестная команда. Попробуйте ещё раз.");
+                    System.out.println("Неизвестная команда. Попробуйте ещё раз.");
             }
         }
 
@@ -147,8 +178,7 @@ public class Main {
                 return value;
             }
 
-            System.out.println(
-                    "Ошибка: поле должно содержать хотя бы одну букву.");
+            System.out.println("Ошибка: поле должно содержать хотя бы одну букву.");
         }
     }
 
@@ -172,12 +202,10 @@ public class Main {
                     return value;
                 }
 
-                System.out.println(
-                        "Ошибка: возраст должен быть больше нуля.");
+                System.out.println("Ошибка: возраст должен быть больше нуля.");
 
             } catch (NumberFormatException e) {
-                System.out.println(
-                        "Ошибка: введите возраст целым числом.");
+                System.out.println("Ошибка: введите возраст целым числом.");
             }
         }
     }
@@ -196,13 +224,28 @@ public class Main {
                     return value;
                 }
 
-                System.out.println(
-                        "Ошибка: введите конечное "
+                System.out.println("Ошибка: введите конечное "
                                 + "неотрицательное число.");
 
             } catch (NumberFormatException e) {
-                System.out.println(
-                        "Ошибка: введите стоимость числом.");
+                System.out.println("Ошибка: введите стоимость числом.");
+            }
+        }
+    }
+    private static int readIndex(Scanner scanner, int size) {
+        while (true) {
+            System.out.print("Введите индекс от 0 до " + (size - 1) + ": ");
+
+            try {
+                int index = Integer.parseInt(scanner.nextLine().trim());
+
+                if (index >= 0 && index < size) {
+                    return index;
+                }
+
+                System.out.println("Индекс находится вне допустимого диапазона.");
+            } catch (NumberFormatException e) {
+                System.out.println("Введите целое число.");
             }
         }
     }
